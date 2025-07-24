@@ -7,16 +7,17 @@ import { ArrowLeft } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 
-// Define the props using a 'type' alias, as recommended by Next.js docs
-type Props = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+// The props are now correctly typed according to the Next.js 15 docs
+export default async function VideoPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  // We MUST await the params promise to access its values
+  const { id } = await params;
 
-// The component is async to fetch data, and it uses the 'Props' type
-export default async function VideoPage({ params }: Props) {
   const video = await prisma.video.findUnique({
-    where: { id: params.id },
+    where: { id: id }, // Use the resolved 'id'
   });
 
   if (!video) {
