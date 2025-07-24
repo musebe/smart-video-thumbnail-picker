@@ -4,15 +4,25 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
+import prisma from '@/lib/prisma';
+import { notFound } from 'next/navigation';
 
-// This interface defines the expected props for this page
-interface VideoPageProps {
-  params: {
-    id: string;
-  };
-}
+// The props are now typed inline here
+export default async function VideoPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  // We can now fetch data since the component is async
+  const video = await prisma.video.findUnique({
+    where: { id: params.id },
+  });
 
-export default function VideoPage({ params }: VideoPageProps) {
+  // If no video is found for the ID, show a 404 page
+  if (!video) {
+    notFound();
+  }
+
   return (
     <main className='container mx-auto py-12 px-4'>
       <div className='mb-8'>
@@ -25,8 +35,11 @@ export default function VideoPage({ params }: VideoPageProps) {
       </div>
       <div className='text-center mb-12'>
         <h1 className='text-4xl font-bold tracking-tight'>Manage Thumbnail</h1>
-        <p className='text-lg text-muted-foreground mt-2'>
-          Editing Video ID: {params.id}
+        <p
+          className='text-lg text-muted-foreground mt-2 max-w-2xl mx-auto truncate'
+          title={video.publicId}
+        >
+          Video Public ID: {video.publicId}
         </p>
       </div>
 
