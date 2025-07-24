@@ -13,5 +13,6 @@ model Video {
   id           String   @id @default(cuid())
   publicId     String   @unique
   thumbnailUrl String
+  duration     Float?
   createdAt    DateTime @default(now())
 }

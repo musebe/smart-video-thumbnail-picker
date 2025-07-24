@@ -1,23 +1,21 @@
 // src/app/video/[id]/page.tsx
 
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
-import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
+import prisma from '@/lib/prisma';
 
-// The props are now correctly typed according to the Next.js 15 docs
+import { ThumbnailEditor } from '@/components/thumbnail-editor';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+
 export default async function VideoPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // We MUST await the params promise to access its values
   const { id } = await params;
-
   const video = await prisma.video.findUnique({
-    where: { id: id }, // Use the resolved 'id'
+    where: { id },
   });
 
   if (!video) {
@@ -34,27 +32,19 @@ export default async function VideoPage({
           </Link>
         </Button>
       </div>
+
       <div className='text-center mb-12'>
         <h1 className='text-4xl font-bold tracking-tight'>Manage Thumbnail</h1>
         <p
           className='text-lg text-muted-foreground mt-2 max-w-2xl mx-auto truncate'
           title={video.publicId}
         >
-          Video Public ID: {video.publicId}
+          {video.publicId}
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Thumbnail Selection</CardTitle>
-        </CardHeader>
-        <CardContent className='text-center p-8 border-2 border-dashed rounded-lg m-6'>
-          <p>
-            The video player and thumbnail controls will be built here in a
-            future step.
-          </p>
-        </CardContent>
-      </Card>
+      {/* Render the interactive client component, passing video data as a prop */}
+      <ThumbnailEditor video={video} />
     </main>
   );
 }

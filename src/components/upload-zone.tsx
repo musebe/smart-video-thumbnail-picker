@@ -1,9 +1,8 @@
-// FILE: src/components/upload-zone.tsx
+// src/components/upload-zone.tsx
 
 'use client';
 
 import { CldUploadWidget } from 'next-cloudinary';
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { saveVideoToDatabase } from '@/app/actions';
@@ -14,29 +13,32 @@ interface CloudinaryResult {
   info?: {
     public_id: string;
     secure_url: string;
+    duration?: number; // <-- Added duration property
   };
 }
 
 export function UploadZone() {
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleSuccess = async (result: CloudinaryResult) => {
-    toast.info('Upload successful! Saving video to your library...');
+  const handleSuccess = (result: CloudinaryResult) => {
+    toast.info('Upload successful! Saving video and redirecting...');
 
     const publicId = result.info?.public_id;
     const videoUrl = result.info?.secure_url;
+    const duration = result.info?.duration; // <-- Get the duration from the result
 
-    if (publicId && videoUrl) {
-      try {
-        await saveVideoToDatabase(publicId, videoUrl);
-        toast.success('Video saved! Redirecting to the editor...');
-      } catch (error) {
-        console.error(error);
-        toast.error('Error: Could not save video information.');
+    // Ensure we have all the required information before calling the server action
+    if (publicId && videoUrl && duration) {
+      // Pass the duration to the server action
+      saveVideoToDatabase(publicId, videoUrl, duration).catch((error) => {
+        console.error('Server action failed:', error);
+        toast.error('A server error occurred. Please try again.');
         setIsUploading(false);
-      }
+      });
     } else {
-      toast.error('Upload Error: The upload result was invalid.');
+      toast.error(
+        'Upload Error: The upload result was invalid or missing data.'
+      );
       setIsUploading(false);
     }
   };
@@ -44,15 +46,12 @@ export function UploadZone() {
   return (
     <div className='w-full max-w-lg mx-auto p-4'>
       <CldUploadWidget
-        // Use the preset name you created in your Cloudinary settings
         uploadPreset='smart-thumbnail-picker'
         options={{
           sources: ['local', 'url', 'google_drive', 'dropbox'],
           multiple: false,
           resourceType: 'video',
-          clientAllowedFormats: ['mp4', 'mov', 'webm', 'ogv'],
-          // CORRECTED: 'maxChunkSize' is the correct property name here
-          maxChunkSize: 20000000, // 20 MB
+          maxChunkSize: 20000000,
         }}
         onSuccess={(result) => handleSuccess(result as CloudinaryResult)}
         onOpen={() => setIsUploading(true)}
