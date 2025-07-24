@@ -7,18 +7,18 @@ import { ArrowLeft } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 
-// The props are now typed inline here
-export default async function VideoPage({
-  params,
-}: {
+// Define the props using a 'type' alias, as recommended by Next.js docs
+type Props = {
   params: { id: string };
-}) {
-  // We can now fetch data since the component is async
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+// The component is async to fetch data, and it uses the 'Props' type
+export default async function VideoPage({ params }: Props) {
   const video = await prisma.video.findUnique({
     where: { id: params.id },
   });
 
-  // If no video is found for the ID, show a 404 page
   if (!video) {
     notFound();
   }
