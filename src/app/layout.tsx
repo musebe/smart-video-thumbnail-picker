@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
+import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,6 +25,11 @@ export default function RootLayout({
           {children}
         </main>
         <Toaster richColors position='top-right' />
+        {/* ADD THE CLOUDINARY WIDGET SCRIPT HERE */}
+        <Script
+          src='https://upload-widget.cloudinary.com/global/all.js'
+          strategy='lazyOnload'
+        />
       </body>
     </html>
   );
